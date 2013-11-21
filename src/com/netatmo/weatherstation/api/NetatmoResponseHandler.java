@@ -36,7 +36,7 @@ public class NetatmoResponseHandler extends JsonHttpResponseHandler {
     public static final int REQUEST_GET_DEVICES_LIST = 1;
     public static final int REQUEST_GET_LAST_MEASURES = 2;
 
-    static final String TAG = "WeatherStationSample";
+    static final String TAG = "NetatmoResponseHandler";
 
     NetatmoHttpClient mHttpClient;
     int mRequestType;
@@ -62,6 +62,10 @@ public class NetatmoResponseHandler extends JsonHttpResponseHandler {
 
     @Override
     public void onSuccess(JSONObject response) {
+    	
+    	final String M = "onSuccess: ";
+        //Log.i(TAG, M);
+    	
         super.onSuccess(response);
 
         switch (mRequestType) {
@@ -84,13 +88,20 @@ public class NetatmoResponseHandler extends JsonHttpResponseHandler {
 
     @Override
     public void onFailure(Throwable e, JSONObject errorResponse) {
+    	final String M = "onFailure: ";
+        Log.i(TAG, M + errorResponse);
+    	
+    	
         super.onFailure(e, errorResponse);
-        Log.e(TAG, errorResponse.toString());
     }
 
     @Override
     public void onFailure(Throwable error, String content) {
+    	
+    	final String M = "onFailure: ";
+    	Log.i(TAG, M + content);
+    	
         super.onFailure(error, content);
-        Log.e(TAG, content);
+
     }
 }

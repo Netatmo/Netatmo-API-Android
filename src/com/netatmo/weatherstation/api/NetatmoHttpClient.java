@@ -16,11 +16,15 @@
 
 package com.netatmo.weatherstation.api;
 
+import android.util.Log;
+
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -33,13 +37,67 @@ abstract public class NetatmoHttpClient {
     protected final String URL_GET_MEASURES = URL_BASE + "/api/getmeasure";
 
     // You can find the AsyncHttpClient library documentation here: http://loopj.com/android-async-http.
-    AsyncHttpClient mClient = new AsyncHttpClient();
-
+    AsyncHttpClient mClient;
+    public static String TAG = "NetatmoHttpClient: ";
+    
+    final String userAgent = "Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30";
+    public NetatmoHttpClient() {
+    	
+    	mClient = new AsyncHttpClient();
+    	mClient.setUserAgent(userAgent);
+    }
+    
     /**
      * POST request using AsyncHttpClient.
      */
-    protected void post(String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
-        mClient.post(url, params, responseHandler);
+    protected void post(String url, HashMap<String, String> params, final JsonHttpResponseHandler responseHandler) {
+    	final String M = "post: ";
+        //Log.i(TAG, M);
+    	
+    	/* apache httpClient (super of asyncHttpClient ) cant handle netatmo certificats.
+    	 *  To make it work, we will use HttpsURLConnection for all https requests */
+    	if( url.startsWith("https") ) {
+    		responseHandler.onStart();
+    		
+			new HttpUrlConnectionService(url, params, userAgent) {
+				
+				@Override
+				public void onSuccess(String response) {
+					//Log.i(TAG,M + " ON_SUCCESS");
+					JSONObject json_object = null;
+					if(response != null)
+						try {
+							json_object = new JSONObject(response);
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					
+					responseHandler.onSuccess(json_object);
+					responseHandler.onFinish();
+				}
+				
+				@Override
+				public void onFailure(String response) {
+					//Log.i(TAG,M + " ON_FAILURE");
+					JSONObject json_object = null;
+					if(response != null)
+						try {
+							json_object = new JSONObject(response);
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					
+					responseHandler.onFailure(null, json_object);
+					
+					responseHandler.onFinish();
+					
+			}};
+    	} else {
+    		RequestParams request_params = HttpUrlConnectionService.createParams(params);
+    		mClient.post(url, request_params, responseHandler);
+    	}
     }
 
     /**
@@ -48,20 +106,32 @@ abstract public class NetatmoHttpClient {
      * we need to check if it has not expired.
      * See {@link #refreshToken(String, com.loopj.android.http.JsonHttpResponseHandler)}.
      */
-    protected void get(final String url, final RequestParams params, final AsyncHttpResponseHandler responseHandler) {
+    protected void get(final String url, final HashMap<String, String> params, final JsonHttpResponseHandler responseHandler) {
+    	final String M = "get: ";
+        //Log.i(TAG, M );
+    			
         if (System.currentTimeMillis() >= getExpiresAt()) {
             refreshToken(getRefreshToken(), new JsonHttpResponseHandler() {
                 @Override
                 public void onSuccess(JSONObject response) {
-                    super.onSuccess(response);
+//                    super.onSuccess(response);
                     processOAuthResponse(response);
                     params.put("access_token", getAccessToken());
-                    mClient.get(url, params, responseHandler);
+//                    mClient.post(url, params, responseHandler);
+                    post(url, params, responseHandler);
+                }
+                @Override
+                @Deprecated
+                public void onFailure(Throwable error, String content) {
+
+                	super.onFailure(error, content);
+                	responseHandler.onFailure(error, content);
                 }
             });
         } else {
             params.put("access_token", getAccessToken());
-            mClient.get(url, params, responseHandler);
+//            mClient.post(url, params, responseHandler);
+            post(url, params, responseHandler);
         }
     }
 
@@ -71,7 +141,7 @@ abstract public class NetatmoHttpClient {
      * using your application's credentials and the user's credentials.
      */
     public void login(String email, String password, JsonHttpResponseHandler responseHandler) {
-        RequestParams params = new RequestParams();
+    	HashMap<String, String> params = new HashMap<String, String>();
         params.put("grant_type", "password");
         params.put("client_id", getClientId());
         params.put("client_secret", getClientSecret());
@@ -79,6 +149,7 @@ abstract public class NetatmoHttpClient {
         params.put("password", password);
 
         post(URL_REQUEST_TOKEN, params, responseHandler);
+        
     }
 
     /**
@@ -88,7 +159,7 @@ abstract public class NetatmoHttpClient {
      * Both the refresh token and the expiration time are obtained during the authentication phase.
      */
     public void refreshToken(String refreshToken, JsonHttpResponseHandler responseHandler) {
-        RequestParams params = new RequestParams();
+        HashMap<String, String> params = new HashMap<String, String>();
         params.put("grant_type", "refresh_token");
         params.put("refresh_token", refreshToken);
         params.put("client_id", getClientId());
@@ -104,7 +175,7 @@ abstract public class NetatmoHttpClient {
      * See <a href="http://dev.netatmo.com/doc/restapi/devicelist">http://dev.netatmo.com/doc/restapi/devicelist</a> for more.
      */
     public void getDevicesList(JsonHttpResponseHandler responseHandler) {
-        get(URL_GET_DEVICES_LIST, new RequestParams(), responseHandler);
+        get(URL_GET_DEVICES_LIST, new HashMap<String, String>(), responseHandler);
     }
 
     /**
@@ -120,7 +191,7 @@ abstract public class NetatmoHttpClient {
      * See <a href="http://dev.netatmo.com/doc/restapi/getmeasure">http://dev.netatmo.com/doc/restapi/getmeasure</a> for more.
      */
     public void getLastMeasures(String stationId, String moduleId, String scale, String[] types, JsonHttpResponseHandler responseHandler) {
-        RequestParams params = new RequestParams();
+        HashMap<String, String> params = new HashMap<String, String> ();
         params.put("device_id", stationId);
 
         if (!moduleId.equals(stationId)) {

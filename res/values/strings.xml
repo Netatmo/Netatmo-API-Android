@@ -31,7 +31,7 @@
 
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_field_required">This field is required</string>
-    <string name="error_bad_credentials">Incorrect email or password </string>
+    <string name="error_bad_credentials">Incorrect email or password.  Dont forget set YOUR_CLIENT_ID YOUR_CLIENT_SECRET . </string>
 
     <!-- Strings related to MainActivity -->
     <string name="action_settings">Settings</string>

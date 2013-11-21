@@ -20,7 +20,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,6 +47,10 @@ public class LoginActivity extends Activity {
     private EditText mPasswordView;
     private Button mSignInButtonView;
 
+    public static String TAG = "LoginActivity: ";
+    
+    Handler handler = new Handler();
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
@@ -132,6 +138,8 @@ public class LoginActivity extends Activity {
             cancel = true;
         }
 
+        
+        
         if (cancel) {
             focusView.requestFocus();
         } else {
@@ -140,6 +148,9 @@ public class LoginActivity extends Activity {
     }
 
     private void netatmoLogin() {
+    	final String M = "netatmoLogin: ";
+    	Log.i(TAG,M);
+    	
         final SampleHttpClient httpClient = new SampleHttpClient(this);
 
         // NetatmoResponseHandler parses and handles the response.
@@ -148,31 +159,67 @@ public class LoginActivity extends Activity {
                 NetatmoResponseHandler.REQUEST_LOGIN, null) {
             @Override
             public void onStart() {
+            	
+            	Log.i(TAG,M + " onStart:");
+            	
+            	
                 super.onStart();
-                setProgressBarIndeterminateVisibility(Boolean.TRUE);
-                mSignInButtonView.setVisibility(View.GONE);
-                mInProgress = true;
+                
+                
+                
+                handler.post(new Runnable() {
+					
+					@Override	public void run() {
+
+		                setProgressBarIndeterminateVisibility(Boolean.TRUE);
+		                mSignInButtonView.setVisibility(View.GONE);
+		                mInProgress = true;						
+				}});
+
             }
 
             @Override
             public void onLoginResponse() {
+            	Log.i(TAG,M + " onLoginResponse:");
                 setResult(RESULT_OK);
                 finish();
             }
 
             @Override
             public void onFailure(Throwable e, JSONObject errorResponse) {
+            	Log.i(TAG,M + " onFailure:");
+            	
                 super.onFailure(e, errorResponse);
-                mEmailView.setError(getString(R.string.error_bad_credentials));
-                mEmailView.requestFocus();
+                
+                Log.i(TAG,M + " onFailure:");
+                handler.post(new Runnable() {
+					
+					@Override	public void run() {
+		                
+		                mEmailView.setError(getString(R.string.error_bad_credentials));
+		                mEmailView.requestFocus();				
+				}});
+                
+                
+
             }
 
             @Override
             public void onFinish() {
+            	Log.i(TAG,M + " onFinish:");
+            	
                 super.onFinish();
-                setProgressBarIndeterminateVisibility(Boolean.FALSE);
-                mSignInButtonView.setVisibility(View.VISIBLE);
-                mInProgress = false;
+                
+                
+                handler.post(new Runnable() {
+					
+					@Override	public void run() {
+					
+		                setProgressBarIndeterminateVisibility(Boolean.FALSE);
+		                mSignInButtonView.setVisibility(View.VISIBLE);
+		                mInProgress = false;
+					}});
+
             }
         });
     }

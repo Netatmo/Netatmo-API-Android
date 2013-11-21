@@ -20,6 +20,8 @@ import android.app.ActionBar;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -45,12 +47,19 @@ public class MainActivity extends ListActivity implements ActionBar.OnNavigation
 
     SampleHttpClient mHttpClient;
 
+    
+    public static String TAG = "MainActivity: ";
+    Handler handler = new Handler();
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
 
+        final String M = "onCreate: ";
+        Log.i(TAG, M);
+        
         // HttpClient used for all requests in this activity.
         mHttpClient = new SampleHttpClient(this);
 
@@ -98,9 +107,14 @@ public class MainActivity extends ListActivity implements ActionBar.OnNavigation
             }
 
             @Override
-            public void onGetDevicesListResponse(List<Station> devices) {
+            public void onGetDevicesListResponse(final List<Station> devices) {
                 mDevices = devices;
 
+                handler.post(new Runnable() {
+					
+ 					@Override	public void run() {
+ 						
+ 
                 List<String> stationsNames = new ArrayList<String>();
                 for (Station station : devices) {
                     stationsNames.add(station.getName());
@@ -113,12 +127,21 @@ public class MainActivity extends ListActivity implements ActionBar.OnNavigation
                 actionBar.setDisplayShowTitleEnabled(false);
                 actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
                 actionBar.setListNavigationCallbacks(adapter, activity);
+                
+				}});
             }
 
             @Override
             public void onFinish() {
-                super.onFinish();
-                setProgressBarIndeterminateVisibility(Boolean.FALSE);
+            	
+            	super.onFinish();
+            	
+                handler.post(new Runnable() {
+					
+ 					@Override	public void run() {
+                
+ 						setProgressBarIndeterminateVisibility(Boolean.FALSE);
+ 				}});
             }
         });
     }
@@ -176,19 +199,32 @@ public class MainActivity extends ListActivity implements ActionBar.OnNavigation
             mHttpClient.getLastMeasures(station.getId(), module.getId(), Params.SCALE_MAX, types,
                     new NetatmoResponseHandler(mHttpClient, NetatmoResponseHandler.REQUEST_GET_LAST_MEASURES, types) {
                 @Override
-                public void onGetMeasuresResponse(Measures measures) {
+                public void onGetMeasuresResponse( final Measures measures) {
+                	
+                    handler.post(new Runnable() {
+    					
+     					@Override	public void run() {
+     						
                     module.setMeasures(measures);
                     mListItems.add(module);
                     mAdapter.notifyDataSetChanged();
+                    
+     				}});
                 }
 
                 @Override
                 public void onFinish() {
                     super.onFinish();
+                    
+                    handler.post(new Runnable() {
+    					
+     					@Override	public void run() {
                     mCompletedRequest--;
                     if (mCompletedRequest == 0) {
                         setProgressBarIndeterminateVisibility(Boolean.FALSE);
                     }
+                    
+     				}});
                 }
             });
         }

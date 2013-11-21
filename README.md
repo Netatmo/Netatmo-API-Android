@@ -16,7 +16,8 @@ Explanation & Usage
 3. Using the previously created class, authenticate your user, e.g. [__LoginActivity__][5].
 4. When authentication tokens are stored, call getDevicesList() and getLastMeasures() with proper parameters, e.g. [__MainActivity__][6].
 
-Each request is made using the __Android Asynchronous Http Client__. This is a callback-based http client library. When a response is received, the library sends it to a handler. We provide our own handler ([__NetatmoResponseHandler__][7]) that returns a parsed response but you can also use the ones provided by the [library][8].
+Each request is made using the __Android Asynchronous Http Client__. This is a callback-based http client library. When a response is received, the library sends it to a handler. We provide our own handler ([__NetatmoResponseHandler__][7]) that returns a parsed response but you can also use the ones provided by the [library][8]. 
+
 
 
 Credits

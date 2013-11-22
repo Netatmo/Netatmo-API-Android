@@ -19,6 +19,17 @@ Explanation & Usage
 Each request is made using the __Android Asynchronous Http Client__. This is a callback-based http client library. When a response is received, the library sends it to a handler. We provide our own handler ([__NetatmoResponseHandler__][7]) that returns a parsed response but you can also use the ones provided by the [library][8]. 
 
 
+Quick Start with Ant
+--------
+1. Download the sources. We have suposition that 'android' and 'ant' binaries in your PATH.
+2. Enter the source directory.
+3. Create ant project with command: 
+android update project -p . --target android-17
+4. Set your CLIENT\_ID and  CLIENT\_SECRET in SampleHttpClient.java.
+5. Compile and build project:
+ant debug install
+6. Application compiled and installed. You can run application.
+
 
 Credits
 --------

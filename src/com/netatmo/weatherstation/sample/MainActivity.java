@@ -16,6 +16,10 @@
 
 package com.netatmo.weatherstation.sample;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import android.app.ActionBar;
 import android.app.ListActivity;
 import android.content.Intent;
@@ -27,14 +31,12 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.widget.ArrayAdapter;
 
+import com.netatmo.netatmolibstation.R;
 import com.netatmo.weatherstation.api.NetatmoResponseHandler;
 import com.netatmo.weatherstation.api.model.Measures;
 import com.netatmo.weatherstation.api.model.Module;
 import com.netatmo.weatherstation.api.model.Params;
 import com.netatmo.weatherstation.api.model.Station;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends ListActivity implements ActionBar.OnNavigationListener {
     final int REQUEST_CODE = 0;
@@ -177,7 +179,7 @@ public class MainActivity extends ListActivity implements ActionBar.OnNavigation
         setProgressBarIndeterminateVisibility(Boolean.TRUE);
 
         Station station = mDevices.get(itemPosition);
-        List<Module> modules = station.getModules();
+        final List<Module> modules = station.getModules();
         mCompletedRequest = modules.size();
 
         if (!mListItems.isEmpty()) {
@@ -193,42 +195,33 @@ public class MainActivity extends ListActivity implements ActionBar.OnNavigation
                 Params.TYPE_TEMPERATURE
         };
 
-        for (final Module module : modules) {
-            // NetatmoResponseHandler returns a parsed response (by overriding onGetMeasuresResponse).
-            // You can also use JsonHttpResponseHandler and process the response as you wish.
-            mHttpClient.getLastMeasures(station.getId(), module.getId(), Params.SCALE_MAX, types,
-                    new NetatmoResponseHandler(mHttpClient, NetatmoResponseHandler.REQUEST_GET_LAST_MEASURES, types) {
-                @Override
-                public void onGetMeasuresResponse( final Measures measures) {
-                	
-                    handler.post(new Runnable() {
-    					
-     					@Override	public void run() {
-     						
-                    module.setMeasures(measures);
-                    mListItems.add(module);
-                    mAdapter.notifyDataSetChanged();
-                    
-     				}});
-                }
+        Log.d(TAG, "calling HTTP");
+        /* NetatmoResponseHandler returns a parsed response (by overriding onGetMeasuresResponse).
+         * You can also use JsonHttpResponseHandler and process the response as you wish.
+         * 
+         * The API changed a bit, and now the deviceList contains all the basic data you may need, no need to call
+         * getMeasures (except if you need only module-specific data, like for a widget for example)
+         * We are reloading it at every item selected only to show the update process, it's not really optimized.
+         */
+        mHttpClient.getDevicesList(
+                new NetatmoResponseHandler(mHttpClient, NetatmoResponseHandler.REQUEST_GET_LAST_MEASURES, types) {
+                    @Override
+                    public void onGetMeasuresResponse( final HashMap<String, Measures> measures) {
+                        for (final Module module : modules) {
+                            if (measures.containsKey(module.getId())) {
+                                module.setMeasures(measures.get(module.getId()));
+                                mListItems.add(module);
+                            }
+                        }
 
-                @Override
-                public void onFinish() {
-                    super.onFinish();
-                    
-                    handler.post(new Runnable() {
-    					
-     					@Override	public void run() {
-                    mCompletedRequest--;
-                    if (mCompletedRequest == 0) {
-                        setProgressBarIndeterminateVisibility(Boolean.FALSE);
+                        handler.post(new Runnable() {
+                            @Override   public void run() {
+                                mAdapter.notifyDataSetChanged();
+                                setProgressBarIndeterminateVisibility(Boolean.FALSE);
+
+                            }});
                     }
-                    
-     				}});
-                }
-            });
-        }
-
+                });
         return true;
     }
 }

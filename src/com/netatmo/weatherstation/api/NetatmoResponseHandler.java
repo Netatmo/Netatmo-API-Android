@@ -16,15 +16,16 @@
 
 package com.netatmo.weatherstation.api;
 
+import java.util.HashMap;
+import java.util.List;
+
+import org.json.JSONObject;
+
 import android.util.Log;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.netatmo.weatherstation.api.model.Measures;
 import com.netatmo.weatherstation.api.model.Station;
-
-import org.json.JSONObject;
-
-import java.util.List;
 
 /**
  * Netatmo's implemantation of {@link com.loopj.android.http.JsonHttpResponseHandler}.
@@ -58,7 +59,7 @@ public class NetatmoResponseHandler extends JsonHttpResponseHandler {
 
     public void onLoginResponse() {}
     public void onGetDevicesListResponse(List<Station> devices) {}
-    public void onGetMeasuresResponse(Measures measures) {}
+    public void onGetMeasuresResponse(HashMap<String, Measures> measures) {}
 
     @Override
     public void onSuccess(JSONObject response) {
@@ -78,7 +79,7 @@ public class NetatmoResponseHandler extends JsonHttpResponseHandler {
                 onGetDevicesListResponse(list);
                 break;
             case REQUEST_GET_LAST_MEASURES:
-                Measures measures = NetatmoUtils.parseMeasures(response, mMeasuresTypes);
+                HashMap<String, Measures> measures = NetatmoUtils.parseMeasures(response, mMeasuresTypes);
                 onGetMeasuresResponse(measures);
                 break;
             default:

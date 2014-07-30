@@ -16,23 +16,23 @@
 
 package com.netatmo.weatherstation.api;
 
-import com.netatmo.weatherstation.api.model.Measures;
-import com.netatmo.weatherstation.api.model.Module;
-import com.netatmo.weatherstation.api.model.Params;
-import com.netatmo.weatherstation.api.model.Station;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import com.netatmo.weatherstation.api.model.Measures;
+import com.netatmo.weatherstation.api.model.Module;
+import com.netatmo.weatherstation.api.model.Params;
+import com.netatmo.weatherstation.api.model.Station;
 
 public class NetatmoUtils {
-    public static final String KEY_ACCESS_TOKEN = "access_token";
+    public static final String KEY_ACCESS_TOKEN  = "access_token";
     public static final String KEY_REFRESH_TOKEN = "refresh_token";
-    public static final String KEY_EXPIRES_AT = "expires_at";
+    public static final String KEY_EXPIRES_AT    = "expires_at";
 
     public static HashMap<String, String> parseOAuthResponse(JSONObject response) {
         HashMap<String, String> parsedResponse = new HashMap<String, String>();
@@ -45,7 +45,7 @@ public class NetatmoUtils {
             parsedResponse.put("access_token", accessToken);
 
             String expiresIn = response.getString("expires_in");
-            Long expiresAt = System.currentTimeMillis() + Long.valueOf(expiresIn)*1000;
+            Long expiresAt = System.currentTimeMillis() + Long.valueOf(expiresIn) * 1000;
             parsedResponse.put("expires_at", expiresAt.toString());
         } catch (JSONException e) {
             e.printStackTrace();
@@ -96,39 +96,91 @@ public class NetatmoUtils {
         return devices;
     }
 
-    public static Measures parseMeasures(JSONObject response, String[] types) {
-        Measures measures = new Measures();
+    public static String getJSONString(JSONObject jo, String s) {
+        if (jo == null || s == null || !jo.has(s)) {
+            return null;
+        }
+        try {
+            return jo.getString(s);
+        } catch (Exception e) {
+        }
+
+        return null;
+    }
+
+    public static HashMap<String, Measures> parseMeasures(JSONObject response, String[] types) {
+        HashMap<String, Measures> result = new HashMap<>();
 
         try {
-            JSONObject body = response.getJSONArray("body").getJSONObject(0);
+            JSONObject body = response.getJSONObject("body");
 
-            String beginTime = body.getString("beg_time");
-            measures.setBeginTime((beginTime == null) ? 0 : Long.parseLong(beginTime)*1000);
+            // We parse all the stations
+            JSONArray stations = body.getJSONArray("devices");
+            for (int j = 0; j < stations.length(); j++) {
+                Measures measures = new Measures();
+                JSONObject station = stations.getJSONObject(j);
+                String currentId = station.getString("_id");
+                JSONObject moduleData = station.getJSONObject("dashboard_data");
 
-            JSONArray values = body.getJSONArray("value").getJSONArray(0);
+                String beginTime = moduleData.getString("time_utc");
+                measures.setBeginTime((beginTime == null) ? 0 : Long.parseLong(beginTime) * 1000);
 
-            for (int i=0; i < types.length; i++) {
-                if (types[i].equals(Params.TYPE_TEMPERATURE)) {
-                    measures.setTemperature(getStringFromObject(values.get(i)));
-                } else if (types[i].equals(Params.TYPE_CO2)) {
-                    measures.setCO2(getStringFromObject(values.get(i)));
-                } else if (types[i].equals(Params.TYPE_HUMIDITY)) {
-                    measures.setHumidity(getStringFromObject(values.get(i)));
-                } else if (types[i].equals(Params.TYPE_PRESSURE)) {
-                    measures.setPressure(getStringFromObject(values.get(i)));
-                } else if (types[i].equals(Params.TYPE_NOISE)) {
-                    measures.setNoise(getStringFromObject(values.get(i)));
-                } else if (types[i].equals(Params.TYPE_MIN_TEMP)) {
-                    measures.setMinTemp(getStringFromObject(values.get(i)));
-                } else if (types[i].equals(Params.TYPE_MAX_TEMP)) {
-                    measures.setMaxTemp(getStringFromObject(values.get(i)));
+                for (int i = 0; i < types.length; i++) {
+                    if (types[i].equals(Params.TYPE_TEMPERATURE)) {
+                        measures.setTemperature(getJSONString(moduleData, types[i]));
+                    } else if (types[i].equals(Params.TYPE_CO2)) {
+                        measures.setCO2(getJSONString(moduleData, types[i]));
+                    } else if (types[i].equals(Params.TYPE_HUMIDITY)) {
+                        measures.setHumidity(getJSONString(moduleData, types[i]));
+                    } else if (types[i].equals(Params.TYPE_PRESSURE)) {
+                        measures.setPressure(getJSONString(moduleData, types[i]));
+                    } else if (types[i].equals(Params.TYPE_NOISE)) {
+                        measures.setNoise(getJSONString(moduleData, types[i]));
+                    } else if (types[i].equals(Params.TYPE_MIN_TEMP)) {
+                        measures.setMinTemp(getJSONString(moduleData, types[i]));
+                    } else if (types[i].equals(Params.TYPE_MAX_TEMP)) {
+                        measures.setMaxTemp(getJSONString(moduleData, types[i]));
+                    }
                 }
+
+                result.put(currentId, measures);
+            }
+            // We parse all the modules
+            JSONArray modules = body.getJSONArray("modules");
+            for (int j = 0; j < modules.length(); j++) {
+                Measures measures = new Measures();
+                JSONObject module = modules.getJSONObject(j);
+                String currentId = module.getString("_id");
+                JSONObject moduleData = module.getJSONObject("dashboard_data");
+
+                String beginTime = moduleData.getString("time_utc");
+                measures.setBeginTime((beginTime == null) ? 0 : Long.parseLong(beginTime) * 1000);
+
+                for (int i = 0; i < types.length; i++) {
+                    if (types[i].equals(Params.TYPE_TEMPERATURE)) {
+                        measures.setTemperature(getJSONString(moduleData, types[i]));
+                    } else if (types[i].equals(Params.TYPE_CO2)) {
+                        measures.setCO2(getJSONString(moduleData, types[i]));
+                    } else if (types[i].equals(Params.TYPE_HUMIDITY)) {
+                        measures.setHumidity(getJSONString(moduleData, types[i]));
+                    } else if (types[i].equals(Params.TYPE_PRESSURE)) {
+                        measures.setPressure(getJSONString(moduleData, types[i]));
+                    } else if (types[i].equals(Params.TYPE_NOISE)) {
+                        measures.setNoise(getJSONString(moduleData, types[i]));
+                    } else if (types[i].equals(Params.TYPE_MIN_TEMP)) {
+                        measures.setMinTemp(getJSONString(moduleData, types[i]));
+                    } else if (types[i].equals(Params.TYPE_MAX_TEMP)) {
+                        measures.setMaxTemp(getJSONString(moduleData, types[i]));
+                    }
+                }
+
+                result.put(currentId, measures);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        return measures;
+        return result;
     }
 
     private static String getStringFromObject(Object object) {

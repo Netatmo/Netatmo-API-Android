@@ -34,7 +34,6 @@ abstract public class NetatmoHttpClient {
     protected final String URL_BASE = "https://api.netatmo.net";
     protected final String URL_REQUEST_TOKEN = URL_BASE + "/oauth2/token";
     protected final String URL_GET_DEVICES_LIST = URL_BASE + "/api/devicelist";
-    protected final String URL_GET_MEASURES = URL_BASE + "/api/getmeasure";
 
     // You can find the AsyncHttpClient library documentation here: http://loopj.com/android-async-http.
     AsyncHttpClient mClient;
@@ -177,43 +176,6 @@ abstract public class NetatmoHttpClient {
     public void getDevicesList(JsonHttpResponseHandler responseHandler) {
         get(URL_GET_DEVICES_LIST, new HashMap<String, String>(), responseHandler);
     }
-
-    /**
-     * Returns the last measurements for the given parameters.
-     *
-     * @param stationId A main device id from the {@link #getDevicesList(com.loopj.android.http.JsonHttpResponseHandler)} request.
-     * @param moduleId Put here the stationId if you want measurements from the main device but not from a module.
-     * @param scale You can specify a SCALE_* from {@link com.netatmo.weatherstation.api.model.Params}.
-     * @param types If you want to use {@link com.netatmo.weatherstation.api.NetatmoUtils#parseMeasures(org.json.JSONObject, String[])}
-     *              you have to use TYPES_* from {@link com.netatmo.weatherstation.api.model.Params}.
-     * @param responseHandler
-     *
-     * See <a href="http://dev.netatmo.com/doc/restapi/getmeasure">http://dev.netatmo.com/doc/restapi/getmeasure</a> for more.
-     */
-    public void getLastMeasures(String stationId, String moduleId, String scale, String[] types, JsonHttpResponseHandler responseHandler) {
-        HashMap<String, String> params = new HashMap<String, String> ();
-        params.put("device_id", stationId);
-
-        if (!moduleId.equals(stationId)) {
-            params.put("module_id", moduleId);
-        }
-
-        params.put("scale", scale);
-
-        String stringTypes = "";
-        for (int i=0; i < types.length; i++) {
-            stringTypes += types[i];
-            if (i+1 < types.length) {
-                stringTypes += ",";
-            }
-        }
-
-        params.put("type", stringTypes);
-        params.put("date_end", "last");
-
-        get(URL_GET_MEASURES, params, responseHandler);
-    }
-
 
     /**
      * Making sure to call {@link #storeTokens(String, String, long)} with proper values.

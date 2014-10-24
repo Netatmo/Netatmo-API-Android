@@ -109,7 +109,7 @@ public class NetatmoUtils {
     }
 
     public static HashMap<String, Measures> parseMeasures(JSONObject response, String[] types) {
-        HashMap<String, Measures> result = new HashMap<>();
+        HashMap<String, Measures> result = new HashMap<String, Measures>();
 
         try {
             JSONObject body = response.getJSONObject("body");

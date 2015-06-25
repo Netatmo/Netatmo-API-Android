@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Weather Station Sample</string>
+
+    <string name="title_activity_login">Log in</string>
+
+    <string name="label_login">Login</string>
+
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+
+    <string name="action_sign_in">Sign in</string>
+
+    <string name="action_forgot_password">Recover lost password</string>
+    <string name="action_create_account">Create account</string>
+
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="error_bad_credentials">Incorrect email or password.  Dont forget set YOUR_CLIENT_ID YOUR_CLIENT_SECRET . </string>
+
+    <!-- Strings related to MainActivity -->
+    <string name="action_settings">Settings</string>
+    <string name="action_sign_out">Sign out</string>
+</resources>

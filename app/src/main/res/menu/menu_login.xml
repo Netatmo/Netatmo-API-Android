@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="weatherstation.netatmo.com.netatmo_api_android.sample.LoginActivity">
+    <item android:id="@+id/action_forgot_password"
+        android:title="@string/action_forgot_password" />
+
+    <item android:id="@+id/action_create_account"
+        android:title="@string/action_create_account" />
+</menu>

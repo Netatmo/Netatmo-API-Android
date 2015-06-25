@@ -1,39 +1,40 @@
 Weather Station Sample App - Android
 ========
 
-Sample application that implements the Netatmo API available here: http://dev.netatmo.com/doc/
+Sample application that implements the Netatmo API available here: [__dev.netatmo.com/doc/__][8]
+
+
+This app uses the Android Volley library (which uses HttpUrlConnection or AndroidHttpClient). You can use any other library as long as it support [__SNI__][7].
 
 It contains two packages:
+
  * [__api__][1]: Classes to get you started with our API including a http client and some parsing utilies. This implementation provides tools to get the last measurements for a given device.
  * [__sample__][2]: A quick example of what you can do with the __api__ package.
+
 
 
 Explanation & Usage
 --------
 
-1. Register your Netatmo application: http://dev.netatmo.com/dev/createapp.
+1. Register your Netatmo application: https://dev.netatmo.com/dev/createapp.
 2. Extend the [__NetatmoHttpClient__][3] class, e.g. [__SampleHttpClient__][4].
 3. Using the previously created class, authenticate your user, e.g. [__LoginActivity__][5].
 4. When authentication tokens are stored, call getDevicesList() and getLastMeasures() with proper parameters, e.g. [__MainActivity__][6].
 
-Each request is made using the __Android Asynchronous Http Client__. This is a callback-based http client library. When a response is received, the library sends it to a handler. We provide our own handler ([__NetatmoResponseHandler__][7]) that returns a parsed response but you can also use the ones provided by the [library][8]. 
+Each request is made using the __HTTP library volley__.
 
 
-Quick Start with Ant
+Quick Start with the apps
 --------
-1. Download the sources. We have suposition that 'android' and 'ant' binaries in your PATH.
-2. Enter the source directory.
-3. Create ant project with command: 
-android update project -p . --target android-17
-4. Set your CLIENT\_ID and  CLIENT\_SECRET in SampleHttpClient.java.
-5. Compile and build project:
-ant debug install
-6. Application compiled and installed. You can run application.
+1. Download the sources. We assume that you are using android studio
+2. Import the project : File -> New -> Project from version control -> Github
+3. Set your CLIENT\_ID and  CLIENT\_SECRET and APP_SCOPE in /values/keys.xml
+4. Run the project
 
 
 Credits
 --------
- * Android Asynchronous Http Client: http://loopj.com/android-async-http/
+ * Android Volley library: https://developer.android.com/training/volley/index.html
 
 
 License
@@ -53,11 +54,11 @@ License
     See the License for the specific language governing permissions and
     limitations under the License.
 
-[1]: src/com/netatmo/weatherstation/api/
-[2]: src/com/netatmo/weatherstation/sample/
-[3]: src/com/netatmo/weatherstation/api/NetatmoHttpClient.java
-[4]: src/com/netatmo/weatherstation/sample/SampleHttpClient.java
-[5]: src/com/netatmo/weatherstation/sample/LoginActivity.java
-[6]: src/com/netatmo/weatherstation/sample/MainActivity.java
-[7]: src/com/netatmo/weatherstation/api/NetatmoResponseHandler.java
-[8]: http://loopj.com/android-async-http/doc/com/loopj/android/http/AsyncHttpResponseHandler.html
+[1]: app/src/main/java/weatherstation/netatmo/com/netatmo_api_android/api/
+[2]: app/src/main/java/weatherstation/netatmo/com/netatmo_api_android/sample/
+[3]: app/src/main/java/weatherstation/netatmo/com/netatmo_api_android/api/NetatmoHttpClient.java
+[4]: app/src/main/java/weatherstation/netatmo/com/netatmo_api_android/sample/SampleHttpClient.java
+[5]: app/src/main/java/weatherstation/netatmo/com/netatmo_api_android/sample/LoginActivity.java
+[6]: app/src/main/java/weatherstation/netatmo/com/netatmo_api_android/sample/MainActivity.java
+[7]: https://en.wikipedia.org/wiki/Server_Name_Indication
+[8]: https://dev.netatmo.com/doc/

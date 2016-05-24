@@ -1,7 +1,7 @@
 Weather Station Sample App - Android
 ========
 
-Sample application that implements the Netatmo API available here: [__dev.netatmo.com/doc/__][8]
+Sample application that implements the Netatmo API available here: [https://dev.netatmo.com/dev/resources#/technical/introduction][8]
 
 
 This app uses the Android Volley library (which uses HttpUrlConnection or AndroidHttpClient). You can use any other library as long as it support [__SNI__][7].
@@ -16,7 +16,7 @@ It contains two packages:
 Explanation & Usage
 --------
 
-1. Register your Netatmo application: https://dev.netatmo.com/dev/createapp.
+1. Register your Netatmo application: https://dev.netatmo.com/dev/createanapp.
 2. Extend the [__NetatmoHttpClient__][3] class, e.g. [__SampleHttpClient__][4].
 3. Using the previously created class, authenticate your user, e.g. [__LoginActivity__][5].
 4. When authentication tokens are stored, call getDevicesList() and getLastMeasures() with proper parameters, e.g. [__MainActivity__][6].
